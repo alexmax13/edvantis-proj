@@ -2,3 +2,4 @@ test
 some code
 test token
 test after ssh config
+test after adding ssh pub key
