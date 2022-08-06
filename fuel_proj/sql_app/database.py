@@ -1,7 +1,7 @@
-from operator import and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from . import models
+from . import helper_module
 import os
 from dotenv import load_dotenv
 
@@ -20,26 +20,56 @@ models.Base.metadata.create_all(bind=engine)   # -- create base if not exist
 
 class DatabaseAccess:
 
-    def get_stations(self, locations): # add location 
-        latitude_min = locations['latitude'] - 0.5
-        latitude_max = locations['latitude'] + 0.5
-
-        longitude_min = locations['longitude'] - 0.5
-        longitude_max = locations['longitude'] + 0.5
-
+    def get_stations(self, location, range):
+        result = []
         with Sesssion() as sess:
-            result = []
-            for i in sess.query(
-                models.Stations).filter(
-                    latitude_min <= models.Stations.latitude, 
-                    models.Stations.latitude <= latitude_max, 
-                    longitude_min <= models.Stations.longitude, 
-                    models.Stations.longitude <= longitude_max
-                    ).group_by(models.Stations.station_id):
-                result.append(i)
-            return result
+            for station in sess.query(models.Stations):
+                price_list_id = []
+                for avaiable_fuel in sess.query(models.FuelAvailability):
+                    if station.id == avaiable_fuel.station_id:
+                        price_list_id.append(avaiable_fuel.fuel_id)
+
+                location_2 = {}
+                location_2['longitude'] = station.longitude
+                location_2['latitude'] = station.latitude
+                res = helper_module.CalculationsHelper.calculate_distance(location, location_2)
+                if res <= range:
+                    dict_ = {
+                        'station_name': station.station_name,
+                        'address': station.address,
+                        'location': {
+                            'longitude': station.longitude,
+                            'latitude': station.latitude},
+                        'avaiable_fuels_id': price_list_id}
+                    result.append(dict_)
+        return result
+
+
+    def get_price(self):
+        with Sesssion() as sess:
+            price_list = []
+            for fuel_type in sess.query(models.FuelType):
+                for fuel_price in sess.query(models.FuelPrice):
+                    if fuel_type.id == fuel_price.fuel_id:
+                        price_dict = {
+                            'name': fuel_type.fuel_name,
+                            'price': fuel_price.price, 
+                            'id': fuel_type.id}
+
+                        price_list.append(price_dict)
+                        break
+        return price_list
+            
+
 
     def push_data(self, data):
         with Sesssion() as sess:
             sess.add(data)
             sess.commit()
+
+# loc = {"longitude":26.257870, "latitude": 50.624613}
+# ran = 50.0
+# a = DatabaseAccess()
+
+# print(a.get_stations(loc, ran))
+
