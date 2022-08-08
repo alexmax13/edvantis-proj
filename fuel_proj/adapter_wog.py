@@ -4,12 +4,12 @@ from sql_app import database, models
 
 URL = "https://api.wog.ua/fuel_stations"
 
-def adapter(url):
+def get_wog_data(url):
     api_response = requests.get(url)
     data = json.loads(api_response.text)['data']
     db = database.DatabaseAccess()
     
-    with database.Sesssion() as sess:        
+    with database.Sesssion() as sess:
         for station_data in data['stations']:
 
             stations = models.Stations(
@@ -19,7 +19,7 @@ def adapter(url):
                 longitude = station_data['coordinates']['longitude'],
                 latitude = station_data['coordinates']['latitude'])
 
-            db.push_data(stations)
+            db.add_station(stations)
 
         for fuel_data in data['fuel_filters']:
             if fuel_data['id'] == 3:
@@ -32,7 +32,7 @@ def adapter(url):
                     api_id = fuel_data['id'],
                     fuel_name = fuel_data['name'] + " " + fuel_data['brand'])
             
-            db.push_data(fuel_type)
+            db.add_fuel_type(fuel_type)
 
         for fuel_data in data['fuel_filters']:
                 for id in sess.query(models.FuelType):
@@ -40,11 +40,10 @@ def adapter(url):
                         fuel_price = models.FuelPrice(
                             fuel_id = id.id,
                             price = round(float(fuel_data['price'] / 100), 2))
-                        db.push_data(fuel_price)
+
+                        db.add_fuel_price(fuel_price)
                         break
 
-
-        
         for station_data in data['stations']:
 
             station_link = station_data['link']
@@ -61,9 +60,9 @@ def adapter(url):
                                     station_id = statation.id,
                                     fuel_id = type.id)
                                     
-                                db.push_data(fuel_availability)
+                                db.add_fuel_avaiability(fuel_availability)
                                 break
                     break
                     
                             
-adapter(URL)
+get_wog_data(URL)
