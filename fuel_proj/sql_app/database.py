@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from . import models
 from . import helper_module
+from . import schemas
 import os
 from dotenv import load_dotenv
 
@@ -34,13 +35,15 @@ class DatabaseAccess:
                 location_2['latitude'] = station.latitude
                 res = helper_module.CalculationsHelper.calculate_distance(location, location_2)
                 if res <= range:
-                    dict_ = {
-                        'station_name': station.station_name,
-                        'address': station.address,
-                        'location': {
-                            'longitude': station.longitude,
-                            'latitude': station.latitude},
-                        'avaiable_fuels_id': price_list_id}
+                    loc = schemas.Location(
+                            longitude = station.longitude,
+                            latitude = station.latitude) 
+
+                    dict_ = schemas.Stations(
+                        station_name = station.station_name,
+                        address = station.address,
+                        location = loc,
+                        avaiable_fuels_id = price_list_id)
                     result.append(dict_)
         return result
 
@@ -51,25 +54,75 @@ class DatabaseAccess:
             for fuel_type in sess.query(models.FuelType):
                 for fuel_price in sess.query(models.FuelPrice):
                     if fuel_type.id == fuel_price.fuel_id:
-                        price_dict = {
-                            'name': fuel_type.fuel_name,
-                            'price': fuel_price.price, 
-                            'id': fuel_type.id}
+                        price_dict = schemas.Price(
+                            name = fuel_type.fuel_name,
+                            price = fuel_price.price, 
+                            id = fuel_type.id)
 
                         price_list.append(price_dict)
                         break
         return price_list
             
 
-
-    def push_data(self, data):
+    def add_station(self, data):
         with Sesssion() as sess:
-            sess.add(data)
-            sess.commit()
+            result = sess.query(models.Stations).where(models.Stations.api_id == data.api_id)
 
-# loc = {"longitude":26.257870, "latitude": 50.624613}
-# ran = 50.0
-# a = DatabaseAccess()
+            if len([*result]) > 0:
+                data.id = result.first().id
+                sess.merge(data)
+                sess.commit()
 
-# print(a.get_stations(loc, ran))
+            else:
+                sess.add(data)
+                sess.commit()
+
+
+    def add_fuel_type(self, fuel_type):
+        with Sesssion() as sess:
+            result = sess.query(models.FuelType).where(models.FuelType.api_id == fuel_type.api_id)
+
+            if len([*result]) > 0:
+                fuel_type.id = result.first().id
+                sess.merge(fuel_type)
+                sess.commit()
+            else:
+                sess.add(fuel_type)
+                sess.commit()
+
+
+    def add_fuel_price(self, fuel_price):
+         with Sesssion() as sess:
+            result = sess.query(models.FuelPrice).where(models.FuelPrice.fuel_id == fuel_price.fuel_id)
+
+            if len([*result]) > 0:
+                fuel_price.id = result.first().id
+                sess.merge(fuel_price)
+                sess.commit()
+            else:
+                sess.add(fuel_price)
+                sess.commit()
+
+
+    def add_fuel_avaiability(self, fuel_avaiability):
+         with Sesssion() as sess:
+            result = sess.query(models.FuelAvailability).filter(
+                models.FuelAvailability.station_id == fuel_avaiability.station_id,
+                models.FuelAvailability.fuel_id == fuel_avaiability.fuel_id,)
+
+            if len([*result]) > 0:
+                fuel_avaiability.id = result.first().id
+                sess.merge(fuel_avaiability)
+                sess.commit()
+            else:
+                sess.add(fuel_avaiability)
+                sess.commit()
+
+     
+if __name__ == '__main__':
+    loc = {"longitude":26.257870, "latitude": 50.624613}
+    ran = 50.0
+    a = DatabaseAccess()
+
+    print(a.get_stations(loc, ran))
 
