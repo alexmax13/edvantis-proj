@@ -1,18 +1,21 @@
 from pydantic import BaseModel
 from . import models
 
-class Record(BaseModel):
-    station_id: int
-    station_name: str
-    address: str
-    A_95: int
-    A_92: int
-    Disel: int
-    Gas: int
+
+class Location(BaseModel):
+    
     longitude: float
     latitude: float
 
+class Stations(BaseModel):
 
-    class Config():
-        orm_mode = True
-        orm_model = models.Stations
+    station_name: str
+    address: str
+    location: Location
+    avaiable_fuels_id: list
+
+class Price(BaseModel):
+
+    name: str
+    price: float
+    id: int
