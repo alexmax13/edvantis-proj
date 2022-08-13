@@ -1,3 +1,4 @@
+"""module with orm models to postgresql database tables"""
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -13,7 +14,6 @@ class Stations(Base):
     longitude = Column(Float)
     latitude = Column(Float)
 
-
 class FuelType(Base):
     __tablename__ = "fuel_type"
 
@@ -21,14 +21,12 @@ class FuelType(Base):
     api_id = Column(Integer)
     fuel_name = Column(String)
 
-
 class FuelPrice(Base):
     __tablename__ = "fuel_price"
 
     id = Column(Integer, primary_key = True)
     fuel_id = Column(ForeignKey(FuelType.id))
     price = Column(Float)
-
 
 class FuelAvailability(Base):
     __tablename__ = "fuel_availability"
