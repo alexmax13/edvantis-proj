@@ -11,21 +11,25 @@ class WogScrapper:
         self.url = url
         api_response = requests.get(self.url)
         if api_response.status_code == 200:
+            print(f"Api request success")
             self.api_raw_json = json.loads(api_response.text)['data']
             self.db_accessor = database.DatabaseAccess()
         else:
-            print("API request failed")
+            print(f"API request failed with code {api_response.status_code}")
 
     def save_stations_data(self):
         """parses stations data and stores to database"""
+        count = 0
         for station_data in self.api_raw_json['stations']:
             station = models.Stations(
-                station_name = "WO",
+                station_name = "WOG",
                 api_id = station_data['id'],
                 address = station_data['name'],
                 longitude = station_data['coordinates']['longitude'],
                 latitude = station_data['coordinates']['latitude'])
             self.db_accessor.add_station(station)
+            count+=1
+        print(f"Seccessful data update of: {count} stations")
 
     def save_fuel_type_data(self):
         """method to get types fuel from json and save it to orm model"""
