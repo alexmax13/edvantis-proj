@@ -71,7 +71,8 @@ class DatabaseAccess:
     def get_station_by_id(self, id):
         """get station by id """
         with Sesssion() as sess:
-            for station in sess.query(models.Stations).where(models.Stations.id == id):
+            for station in sess.query(models.Stations).where(
+                models.Stations.id == id):
                 price_list_id = []
                 for avaiable_fuel in sess.query(models.FuelAvailability):
                     if station.id == avaiable_fuel.station_id:
@@ -93,7 +94,8 @@ class DatabaseAccess:
         """get station by name"""
         result = []
         with Sesssion() as sess:
-            for station in sess.query(models.Stations).where(func.lower(models.Stations.station_name) == func.lower(name)):
+            for station in sess.query(models.Stations).where(
+                func.lower(models.Stations.station_name) == func.lower(name)):
                 price_list_id = []
                 for avaiable_fuel in sess.query(models.FuelAvailability):
                     if station.id == avaiable_fuel.station_id:
@@ -129,7 +131,8 @@ class DatabaseAccess:
     def get_fuel_price_by_id(self, id):
         """get prices by id"""
         with Sesssion() as sess:
-            for fuel_type in sess.query(models.FuelType).where(models.FuelType.id == id):
+            for fuel_type in sess.query(models.FuelType).where(
+                models.FuelType.id == id):
                 for fuel_price in sess.query(models.FuelPrice):
                     if fuel_type.id == fuel_price.fuel_id:
                         price_dict = schemas.Price(
@@ -142,7 +145,8 @@ class DatabaseAccess:
     def add_station(self, data):
         """write data to table stations in database"""
         with Sesssion() as sess:
-            result = sess.query(models.Stations).where(models.Stations.api_id == data.api_id)
+            result = sess.query(models.Stations).where(
+                models.Stations.api_id == data.api_id)
             if len([*result]) > 0:
                 data.id = result.first().id
                 sess.merge(data)
@@ -154,7 +158,8 @@ class DatabaseAccess:
     def add_fuel_type(self, fuel_type):
         """write data to table fuel_type in database"""
         with Sesssion() as sess:
-            result = sess.query(models.FuelType).where(models.FuelType.api_id == fuel_type.api_id)
+            result = sess.query(models.FuelType).where(
+                models.FuelType.api_id == fuel_type.api_id)
             if len([*result]) > 0:
                 fuel_type.id = result.first().id
                 sess.merge(fuel_type)
