@@ -6,7 +6,7 @@ app = FastAPI()
 
 @app.get("/")
 def home():
-    return "go to /stations to see stations, go to /prices to see prices"
+    return "go to /stations to see stations, go to /fuel_prices to see prices"
 
 @app.get("/stations")
 def get_stations(longitude: float = 26.257870, latitude: float = 50.624613, range: float = 50.0):
