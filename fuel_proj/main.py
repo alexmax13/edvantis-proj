@@ -36,7 +36,6 @@ def get_all_stations():
     stations = database.get_all_stations()
     return stations
 
-
 @app.get("/fuel_prices")
 def get_prices():
     db = DatabaseAccess()
