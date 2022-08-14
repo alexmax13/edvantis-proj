@@ -6,9 +6,9 @@ app = FastAPI()
 
 @app.get("/")
 def home():
-    return "go to /stations to see stations, go to /fuel_prices to see prices"
+    return "go to /stations or station_nearby to see stations, go to /fuel_prices to see prices"
 
-@app.get("/stations")
+@app.get("/stations_nearby")
 def get_stations(longitude: float = 26.257870, latitude: float = 50.624613, range: float = 50.0):
     location = {
         'longitude': longitude,
@@ -24,10 +24,10 @@ def get_stations(id: int):
     stations = database.get_station_by_id(id)
     return stations
 
-@app.get("/stations/{name}")
-def get_stations(name: str):
+@app.get("/stations/{station_name}")
+def get_stations(station_name: str):
     database = DatabaseAccess()
-    stations = database.get_stations_by_name(name)
+    stations = database.get_stations_by_name(station_name)
     return stations
 
 @app.get("/all_stations")
