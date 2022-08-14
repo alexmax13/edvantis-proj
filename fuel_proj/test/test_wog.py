@@ -32,7 +32,6 @@ class TestWogScrapper:
                             name = fuel_json['name'] + ' ' + fuel_json['brand']
                             assert  name == fuel_api.fuel_name
 
-
     def test_save_fuel_price_data(self):
         db_data = self.database_accessor.get_prices()
         for fuel_json in self.wog_scrapper.api_raw_json['fuel_filters']:
